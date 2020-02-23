@@ -7,13 +7,10 @@ from multiprocessing import Pool
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-
-
 chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 browser = webdriver.Chrome(options=chrome_options)
-
 
 # browser=webdriver.Chrome()
 
@@ -127,4 +124,4 @@ usage: infoscan.py [-h] [-u URL] [-f FILE]
 				''')
     else:
         main(url)
-    browser.close()
+    browser.quit()
