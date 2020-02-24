@@ -9,6 +9,10 @@ infoscan
 支持ip，url和域名
 支持单个目标和文本批量查询
 
+使用该脚本需要额外安装`selenium`模块
+> pip3 install selenium
+
+另外你还需要`Chromedriver`
 ![demo](demo.png)
 
 [详情见此](http://www.zjun.info/2020/02/23/infoscan)

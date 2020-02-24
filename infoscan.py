@@ -92,7 +92,7 @@ def main(domain):
     except:
         print('连接失败')
     finally:
-        print('\033[31m------------------\033[0m')
+        print(' ')
 
 
 if __name__ == '__main__':
