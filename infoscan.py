@@ -1,3 +1,7 @@
+# Author: zjun
+# Github: https://github.com/bestreder
+# Date: 2020-02-23
+
 import requests
 import socket
 import re
