@@ -8,16 +8,28 @@ import re
 from urllib.parse import urlparse
 import argparse
 from multiprocessing import Pool
+from multiprocessing import Process
+from multiprocessing import Lock
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+
+def logo():
+    print(r'''
+ _        __
+(_)_ __  / _| ___  ___  ___ __ _ _ __
+| | '_ \| |_ / _ \/ __|/ __/ _` | '_ \
+| | | | |  _| (_) \__ \ (_| (_| | | | |
+|_|_| |_|_|  \___/|___/\___\__,_|_| |_|
+                        by:zjun
+                    www.zjun.info''')
 
 chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--disable-gpu')
 browser = webdriver.Chrome(options=chrome_options)
-
 # browser=webdriver.Chrome()
-
+    
+lock = Lock()
 headers = {
     'User-Agent':
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.116 Safari/537.36'
@@ -48,11 +60,10 @@ def get_seo(domain):
 							<li>名称：<span id="icp_company">(.*?)</span></li>
 							<li>审核时间：<span id="icp_passtime">(.*?)</span></li>''', re.S)
     seos = re.findall(pattern, html)
-    for seo in seos:
-        print('百度权重:{}  移动权重:{}  360权重:{}  神马:{}  搜狗:{}  谷歌PR:{}'.format(
-            seo[0], seo[1], seo[2], seo[3], seo[4], seo[5]))
-        print('备案号:{}  性质:{}  名称:{}  审核时间:{}'.format(seo[6], seo[7], seo[8],
-                                                     seo[9]))
+    return seos
+    # for seo in seos:
+    #     print('百度权重:{}  移动权重:{}  360权重:{}  神马:{}  搜狗:{}  谷歌PR:{}'.format(seo[0], seo[1], seo[2], seo[3], seo[4], seo[5]))
+    #     print('备案号:{}  性质:{}  名称:{}  审核时间:{}'.format(seo[6], seo[7], seo[8], seo[9]))
 
 
 def get_ip(domain):
@@ -70,29 +81,37 @@ def get_ipaddress(ip):
     try:
         url = ('https://www.ip.cn/?ip={}'.format(ip))
         r = requests.get(url=url, headers=headers, timeout=3)
-        pattern = re.compile(
-            'setTimeout.*?所在地理位置：<code>(.*?)</code></p><p>GeoIP: <code>(.*?)</code>',
-            re.S)
+        pattern = re.compile('</code></p><p>.*?所在地理位置：<code>(.*?)</code></p><p>GeoIP: <code>(.*?)</code>', re.S)
         address = re.findall(pattern, r.text)
-        for add in address:
-            print('GeoIP:{}'.format(add[1]))
-            print('地理位置:{}'.format(add[0]))
+        return address
+        # for add in address:
+        #     print('GeoIP:{}'.format(add[1]))
+        #     print('地理位置:{}'.format(add[0]))
     except:
         pass
 
 
 def main(domain):
     try:
-        print(url.strip())
         if '://' in domain:
             domain = get_domain(domain)
         ip = get_ip(domain)
-        print('IP:{}'.format(ip))
         if ip == None:
-            get_seo(domain)
+            seos = get_seo(domain)
         else:
-            get_ipaddress(ip)
-            get_seo(domain)
+            address = get_ipaddress(ip)
+            seos = get_seo(domain)
+        lock.acquire()
+        print(url.strip())
+        print('IP:{}'.format(ip))
+        for add in address:
+            print('GeoIP:{}'.format(add[1]))
+            print('地理位置:{}'.format(add[0]))
+        for seo in seos:
+            print('百度权重:{}  移动权重:{}  360权重:{}  神马:{}  搜狗:{}  谷歌PR:{}'.format(seo[0], seo[1], seo[2], seo[3], seo[4], seo[5]))
+            print('备案号:{}  性质:{}  名称:{}  审核时间:{}'.format(seo[6], seo[7], seo[8], seo[9]))
+        lock.release()
+
     except:
         print('连接失败')
     finally:
@@ -100,8 +119,7 @@ def main(domain):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='The script is Information gathering and SEO query')
+    parser = argparse.ArgumentParser(description='The script is Information gathering and SEO query')
     parser.add_argument('-u', '--url', required=False, help='target url')
     parser.add_argument('-f', '--file', required=False, help='target file')
     args = parser.parse_args()
@@ -109,23 +127,16 @@ if __name__ == '__main__':
     url = args.url
     if url == None:
         if file != None:
+            logo()
             with open(file, 'r') as f:
                 url_list = f.readlines()
             for url in url_list:
-                pool = Pool()
-                pool.map(main, (url.strip(), ))
+                pool = Pool(3)
+                pool.map(main, (url.strip(),))
         else:
-            print(r'''
- _        __
-(_)_ __  / _| ___  ___  ___ __ _ _ __
-| | '_ \| |_ / _ \/ __|/ __/ _` | '_ \
-| | | | |  _| (_) \__ \ (_| (_| | | | |
-|_|_| |_|_|  \___/|___/\___\__,_|_| |_|
-			by:zjun
-		    www.zjun.info
-
-usage: infoscan.py [-h] [-u URL] [-f FILE]
-				''')
+            logo()
+            print(r'''usage: infoscan.py [-h] [-u URL] [-f FILE]''')
     else:
+        logo()
         main(url)
     browser.quit()
