@@ -13,6 +13,6 @@ infoscan
 > pip3 install selenium
 
 另外你还需要`Chromedriver`
-![demo](demo.png)
+![](https://i.loli.net/2020/08/14/qmzSZYQolByw9ta.png)
 
 [详情见此](http://www.zjun.info/2020/02/23/infoscan)
