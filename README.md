@@ -15,6 +15,9 @@ pip3 install selenium
 ```
 
 另外你还需要`Chromedriver`
-![](https://i.loli.net/2020/08/14/qmzSZYQolByw9ta.png)
+
+```bash
+brew cask install Chromedriver
+```
 
 [详情见此](http://www.zjun.info/2020/02/23/infoscan)
